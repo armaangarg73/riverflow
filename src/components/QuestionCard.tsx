@@ -59,13 +59,28 @@ const QuestionCard = ({ ques }: { ques: Models.Document }) => {
         <BorderBeam size={height} duration={12} delay={9} />
 
         {isAuthor && (
-          <button
-            onClick={() => setShowDeleteModal(true)}
-            className="absolute right-4 top-4 z-10 rounded-lg bg-red-500/10 p-2 text-red-500 transition-all hover:bg-red-500/20"
-            title="Delete question"
-          >
-            <IconTrash className="h-4 w-4" />
-          </button>
+          <div className="absolute right-4 top-4 z-10 flex gap-2">
+            {/* ✅ EDIT BUTTON */}
+            <button
+              onClick={() =>
+                router.push(
+                  `/users/${ques.author?.$id}/${slugify(
+                    ques.author?.name || "",
+                  )}/edit?questionId=${ques.$id}`,
+                )
+              }
+              className="rounded-lg bg-blue-500/10 px-2 py-1 text-blue-500 hover:bg-blue-500/20 text-xs"
+            >
+              Edit
+            </button>
+
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="rounded-lg bg-red-500/10 p-2 text-red-500 hover:bg-red-500/20"
+            >
+              <IconTrash className="h-4 w-4" />
+            </button>
+          </div>
         )}
 
         <div className="flex shrink-0 flex-col gap-3 text-center text-sm">
