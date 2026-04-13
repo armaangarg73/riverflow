@@ -50,7 +50,7 @@ const LatestQuestions = async () => {
   return (
     <div className="space-y-6">
       {questions.documents.map((question) => (
-        <QuestionCard key={question.$id} ques={question} />
+        <QuestionCard key={question.$id} ques={question as any} />
       ))}
     </div>
   );
