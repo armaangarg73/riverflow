@@ -12,7 +12,21 @@ import { databases } from "@/models/client/config";
 import { db, questionCollection } from "@/models/name";
 import { useRouter } from "next/navigation";
 
-const QuestionCard = ({ ques }: { ques: Models.Document }) => {
+type Question = Models.Document & {
+  title: string;
+  tags: string[] | string;
+
+  totalVotes?: number;
+  totalAnswers?: number;
+
+  author?: {
+    $id: string;
+    name: string;
+    reputation: number;
+  };
+};
+
+const QuestionCard = ({ ques }: { ques: Question }) => {
   const [height, setHeight] = React.useState(0);
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
@@ -32,13 +46,16 @@ const QuestionCard = ({ ques }: { ques: Models.Document }) => {
       ? ques.tags.split(",").filter((t: string) => t.trim().length > 0)
       : ques.tags || [];
 
-  const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(ques.author?.name || "User")}&background=random&size=40`;
+  const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    ques.author?.name || "User",
+  )}&background=random&size=40`;
 
   const isAuthor = user?.$id === ques.author?.$id;
 
   const handleDelete = async () => {
     setIsDeleting(true);
     setError("");
+
     try {
       await databases.deleteDocument(db, questionCollection, ques.$id);
       setShowDeleteModal(false);
@@ -89,6 +106,7 @@ const QuestionCard = ({ ques }: { ques: Models.Document }) => {
             </span>
             <span className="text-xs text-gray-400">votes</span>
           </div>
+
           <div className="flex flex-col">
             <span
               className={`text-lg font-semibold ${
@@ -133,20 +151,26 @@ const QuestionCard = ({ ques }: { ques: Models.Document }) => {
               height={40}
               className="rounded-full"
             />
+
             <div className="flex flex-wrap items-center gap-2">
               <Link
-                href={`/users/${ques.author?.$id}/${slugify(ques.author?.name || "")}`}
+                href={`/users/${ques.author?.$id}/${slugify(
+                  ques.author?.name || "",
+                )}`}
                 className="font-medium text-orange-500 transition-colors hover:text-orange-400"
               >
                 {ques.author?.name}
               </Link>
+
               <span className="text-xs text-gray-400">
                 <span className="font-semibold text-white">
                   {ques.author?.reputation ?? 0}
                 </span>{" "}
                 reputation
               </span>
+
               <span className="text-xs text-gray-500">•</span>
+
               <span className="text-xs text-gray-500">
                 asked {convertDateToRelativeTime(new Date(ques.$createdAt))}
               </span>
@@ -158,19 +182,21 @@ const QuestionCard = ({ ques }: { ques: Models.Document }) => {
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="relative w-full max-w-md rounded-xl border border-white/20 bg-zinc-900 p-6 shadow-2xl">
-            {/* Close button */}
             <button
               onClick={() => setShowDeleteModal(false)}
               className="absolute right-4 top-4 text-gray-400 hover:text-white"
             >
               <IconX className="h-5 w-5" />
             </button>
+
             <h3 className="mb-2 text-xl font-bold text-white">
               Delete Question
             </h3>
+
             <p className="mb-6 text-gray-400">
-              Are you sure you want to delete "{ques.title}"? This action cannot
-              be undone.
+              Are you sure you want to delete{" "}
+              <span className="font-semibold">{ques.title}</span>? This action
+              cannot be undone.
             </p>
 
             {error && (
@@ -178,18 +204,20 @@ const QuestionCard = ({ ques }: { ques: Models.Document }) => {
                 {error}
               </p>
             )}
+
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDeleteModal(false)}
                 disabled={isDeleting}
-                className="flex-1 rounded-lg border border-white/20 bg-white/5 px-4 py-2 font-medium text-white transition-colors hover:bg-white/10 disabled:opacity-50"
+                className="flex-1 rounded-lg border border-white/20 bg-white/5 px-4 py-2 font-medium text-white hover:bg-white/10 disabled:opacity-50"
               >
                 Cancel
               </button>
+
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="flex-1 rounded-lg bg-red-500 px-4 py-2 font-medium text-white transition-colors hover:bg-red-600 disabled:opacity-50"
+                className="flex-1 rounded-lg bg-red-500 px-4 py-2 font-medium text-white hover:bg-red-600 disabled:opacity-50"
               >
                 {isDeleting ? "Deleting..." : "Delete"}
               </button>

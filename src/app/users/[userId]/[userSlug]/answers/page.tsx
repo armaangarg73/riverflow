@@ -32,14 +32,22 @@ const Page = async ({ params, searchParams }: PageProps) => {
 
   const answers = await databases.listDocuments(db, answerCollection, queries);
 
+  // ✅ SAFE mapping (handles missing questions)
   answers.documents = await Promise.all(
     answers.documents.map(async (ans) => {
-      const question = await databases.getDocument(
-        db,
-        questionCollection,
-        ans.questionId,
-        [Query.select(["title"])],
-      );
+      let question = null;
+
+      try {
+        question = await databases.getDocument(
+          db,
+          questionCollection,
+          ans.questionId,
+          [Query.select(["title"])],
+        );
+      } catch (error) {
+        // ignore missing/deleted question
+      }
+
       return { ...ans, question };
     }),
   );
@@ -62,7 +70,7 @@ const Page = async ({ params, searchParams }: PageProps) => {
 
             <Link
               href={`/questions/${ans.questionId}/${slugify(
-                ans.question.title,
+                ans.question?.title || "deleted-question",
               )}`}
               className="mt-3 inline-block rounded bg-orange-500 px-4 py-2 font-bold text-white hover:bg-orange-600"
             >

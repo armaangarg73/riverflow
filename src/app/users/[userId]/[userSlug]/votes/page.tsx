@@ -42,39 +42,38 @@ const Page = async ({ params, searchParams }: PageProps) => {
 
   const votes = await databases.listDocuments(db, voteCollection, query);
 
+  // ✅ SAFE mapping
   votes.documents = await Promise.all(
     votes.documents.map(async (vote) => {
-      const questionOfTypeQuestion =
-        vote.type === "question"
-          ? await databases.getDocument(db, questionCollection, vote.typeId, [
-              Query.select(["title"]),
-            ])
-          : null;
+      let question = null;
 
-      if (questionOfTypeQuestion) {
-        return {
-          ...vote,
-          question: questionOfTypeQuestion,
-        };
+      try {
+        if (vote.type === "question") {
+          question = await databases.getDocument(
+            db,
+            questionCollection,
+            vote.typeId,
+            [Query.select(["title"])],
+          );
+        } else {
+          const answer = await databases.getDocument(
+            db,
+            answerCollection,
+            vote.typeId,
+          );
+
+          question = await databases.getDocument(
+            db,
+            questionCollection,
+            answer.questionId,
+            [Query.select(["title"])],
+          );
+        }
+      } catch (error) {
+        // ignore missing question/answer
       }
 
-      const answer = await databases.getDocument(
-        db,
-        answerCollection,
-        vote.typeId,
-      );
-
-      const questionOfTypeAnswer = await databases.getDocument(
-        db,
-        questionCollection,
-        answer.questionId,
-        [Query.select(["title"])],
-      );
-
-      return {
-        ...vote,
-        question: questionOfTypeAnswer,
-      };
+      return { ...vote, question };
     }),
   );
 
@@ -130,12 +129,12 @@ const Page = async ({ params, searchParams }: PageProps) => {
 
               <p>
                 <Link
-                  href={`/questions/${vote.question.$id}/${slugify(
-                    vote.question.title,
+                  href={`/questions/${vote.typeId}/${slugify(
+                    vote.question?.title || "deleted-question",
                   )}`}
                   className="text-orange-500 hover:text-orange-600"
                 >
-                  {vote.question.title}
+                  {vote.question?.title || "Deleted question"}
                 </Link>
               </p>
             </div>

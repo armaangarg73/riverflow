@@ -19,6 +19,15 @@ import {
   questionCollection,
 } from "@/models/name";
 
+
+type Question = Models.Document & {
+  title: string;
+  content: string;
+  tags: string[] | string;
+  attachmentId: string;
+  authorId: string;
+};
+
 const LabelInputContainer = ({
   children,
   className,
@@ -39,7 +48,7 @@ const LabelInputContainer = ({
   );
 };
 
-const QuestionForm = ({ question }: { question?: Models.Document }) => {
+const QuestionForm = ({ question }: { question?: Question }) => {
   const { user } = useAuthStore();
   const [tag, setTag] = React.useState("");
   const router = useRouter();
@@ -48,7 +57,11 @@ const QuestionForm = ({ question }: { question?: Models.Document }) => {
     title: String(question?.title || ""),
     content: String(question?.content || ""),
     authorId: user?.$id,
-    tags: new Set((question?.tags || []) as string[]),
+    tags: new Set(
+      typeof question?.tags === "string"
+        ? question.tags.split(",")
+        : question?.tags || [],
+    ),
     attachment: null as File | null,
   });
 
@@ -84,7 +97,7 @@ const QuestionForm = ({ question }: { question?: Models.Document }) => {
     if (!question) throw new Error("Please provide a question");
 
     const attachmentId = await (async () => {
-      if (!formData.attachment) return question?.attachmentId as string;
+      if (!formData.attachment) return question.attachmentId;
 
       await storage.deleteFile(questionAttachmentBucket, question.attachmentId);
 
@@ -106,7 +119,7 @@ const QuestionForm = ({ question }: { question?: Models.Document }) => {
         content: formData.content,
         authorId: formData.authorId,
         tags: Array.from(formData.tags).join(","),
-        attachmentId: attachmentId,
+        attachmentId,
       },
     );
 
@@ -149,7 +162,8 @@ const QuestionForm = ({ question }: { question?: Models.Document }) => {
           Title Address
           <br />
           <small>
-            Be specific and imagine you're asking a question to another person.
+            Be specific and imagine you&apos;re asking a question to another
+            person.
           </small>
         </Label>
         <Input
