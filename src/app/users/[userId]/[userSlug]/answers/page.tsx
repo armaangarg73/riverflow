@@ -32,7 +32,6 @@ const Page = async ({ params, searchParams }: PageProps) => {
 
   const answers = await databases.listDocuments(db, answerCollection, queries);
 
-  // ✅ SAFE mapping (handles missing questions)
   answers.documents = await Promise.all(
     answers.documents.map(async (ans) => {
       let question = null;
