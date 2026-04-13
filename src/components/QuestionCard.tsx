@@ -60,7 +60,6 @@ const QuestionCard = ({ ques }: { ques: Models.Document }) => {
 
         {isAuthor && (
           <div className="absolute right-4 top-4 z-10 flex gap-2">
-            {/* ✅ EDIT BUTTON */}
             <button
               onClick={() =>
                 router.push(

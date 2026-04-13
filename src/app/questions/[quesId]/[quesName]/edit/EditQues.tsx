@@ -7,7 +7,12 @@ import { Models } from "appwrite";
 import { useRouter } from "next/navigation";
 import React from "react";
 
-const EditQues = ({ question }: { question: Models.Document }) => {
+type Question = Models.Document & {
+  authorId: string;
+  title: string;
+};
+
+const EditQues = ({ question }: { question: Question }) => {
   const { user } = useAuthStore();
   const router = useRouter();
 
@@ -15,7 +20,7 @@ const EditQues = ({ question }: { question: Models.Document }) => {
     if (question.authorId !== user?.$id) {
       router.push(`/questions/${question.$id}/${slugify(question.title)}`);
     }
-  }, []);
+  }, [question, user, router]);
 
   if (user?.$id !== question.authorId) return null;
 
