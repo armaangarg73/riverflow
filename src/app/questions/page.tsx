@@ -91,7 +91,7 @@ const Page = async ({
       </div>
       <div className="mb-4 max-w-3xl space-y-6">
         {questions.documents.map((ques) => (
-          <QuestionCard key={ques.$id} ques={ques} />
+          <QuestionCard key={ques.$id} ques={ques as any} />
         ))}
       </div>
       <Pagination total={questions.total} limit={25} />
