@@ -41,9 +41,7 @@ const slugs = [
 ];
 
 
-const images = slugs.map(
-  (slug) => `https://cdn.simpleicons.org/${slug}/${slug}`,
-);
+const images = slugs.map((slug) => `https://cdn.simpleicons.org/${slug}`);
 
 const HeroSectionHeader = () => {
   const { session } = useAuthStore();

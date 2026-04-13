@@ -181,12 +181,7 @@ const Page = async ({
 
             {question.attachmentId && (
               <img
-                src={
-                  storage.getFilePreview(
-                    questionAttachmentBucket,
-                    question.attachmentId,
-                  ).toString()
-                }
+                src={`https://fra.cloud.appwrite.io/v1/storage/buckets/${questionAttachmentBucket}/files/${question.attachmentId}/view?project=697a98530018be58a2b9`}
                 alt={question.title}
                 className="mt-3 rounded-lg"
               />

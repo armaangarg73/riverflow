@@ -23,10 +23,7 @@ export default async function HeroSection() {
       products={questions.documents.map((q) => ({
         title: q.title,
         link: `/questions/${q.$id}/${slugify(q.title)}`,
-        thumbnail: storage.getFilePreview(
-          questionAttachmentBucket,
-          q.attachmentId,
-        ).toString(),
+        thumbnail: `https://fra.cloud.appwrite.io/v1/storage/buckets/${questionAttachmentBucket}/files/${q.attachmentId}/view?project=697a98530018be58a2b9`,
       }))}
     />
   );
